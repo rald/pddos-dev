@@ -1,0 +1,72 @@
+#define GRAPHICS_IMPLEMENTATION
+#include "graphics.h"
+
+#define CANVAS_IMPLEMENTATION
+#include "canvas.h"
+
+
+dword pal[] = {
+	0x1A1C2CL,
+	0x5D275DL,
+	0xB13E53L,
+	0xEF7D57L,
+	0xFFCD75L,
+	0xA7F070L,
+	0x38B764L,
+	0x257179L,
+	0x29366FL,
+	0x3B5DC9L,
+	0x41A676L,
+	0x73EFF7L,
+	0xF4F4F4L,
+	0x94B0C2L,
+	0x566C86L,
+	0x333C57L
+};
+
+
+int main() {
+
+	byte *buf=calloc(SCREEN_SIZE,sizeof(byte));
+	Canvas *arrows=Canvas_LoadCVS("arrows.cvs");
+	int f=0,key;
+	bool quit=false;
+	int i,j;
+
+	srand(time(NULL));
+
+	SetMode(0x13);
+
+	for(i=0;i<16;i++) {
+		int r=(int)((pal[i] & 0xFF0000L) >> 16);
+		int g=(int)((pal[i] & 0x00FF00L) >> 8);
+		int b=(int)((pal[i] & 0x0000FFL));
+		r=(int)((double)r/255*63);
+		g=(int)((double)g/255*63);
+		b=(int)((double)b/255*63);
+
+		SetPalette(i,r,g,b);
+	}
+
+	while(!quit) {
+
+		if(kbhit()) {
+			key=getch();
+			if(key==27) quit=true;
+		}
+
+		memset(buf,0,SCREEN_SIZE);
+
+		for(j=0;j<4;j++)
+			for(i=0;i<4;i++)
+				Canvas_Draw(buf,arrows,i*16,j*16,(f%10)%arrows->frames,1);
+
+		vsync();
+		memcpy(VGA,buf,SCREEN_SIZE);
+
+		f++;
+
+	}
+
+	return 0;
+}
